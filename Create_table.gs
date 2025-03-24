@@ -55,10 +55,12 @@ function createDayBlock(sheet, rowStart, colStart, rowHeight, colWidth, date) {
        .setFontWeight('bold');
 
   // Set the week number
-  sheet.getRange(rowStart, colStart)
+  if(date.getDay()===1){
+    sheet.getRange(rowStart, colStart)
        .setValue('Week ' + weekNumber)
-       .setFontWeight('bold');
-
+       .setFontWeight('bold')
+       .setFontSize(14);
+  }
   // Set the formula for day name
   sheet.getRange(rowStart, colStart + 2)
        .setFormulaR1C1("=R[0]C[-1]")
@@ -139,5 +141,4 @@ function myFunction() {
     // Move to the next block position - this is where we need to fix the issue
     rowStart += blockHeight;
   }
-  autoResizeSheet();
 }
