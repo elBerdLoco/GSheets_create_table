@@ -1,0 +1,89 @@
+var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+var sheet = spreadsheet.getActiveSheet();
+var ui = SpreadsheetApp.getUi();
+
+//Create table section for the day
+function monWedFri(row) {
+  
+  //START: Border creation
+  // Main border around the entire table (7 rows, 5 columns)
+  var range = sheet.getRange(row, 1, 7, 5);
+  range.setBorder(true, true, true, true, false, false, '#000000', SpreadsheetApp.BorderStyle.SOLID_THICK);
+
+  // Vertical borders for column B (7 rows, 1 column)
+  range = sheet.getRange(row, 2, 7, 1);
+  range.setBorder(null, true, null, true, false, false, '#000000', SpreadsheetApp.BorderStyle.SOLID_THICK);
+
+  // Horizontal border for header row (1 row, 5 columns)
+  range = sheet.getRange(row+1, 1, 1, 5);
+  range.setBorder(true, null, true, null, null, null, '#000000', SpreadsheetApp.BorderStyle.SOLID_THICK);
+  //END: Border Creation
+
+  //START: Column labels
+  sheet.getRange(row+1, 1).setValue('Name');
+  sheet.getRange(row+1, 2).setValue('Scheduled');
+  sheet.getRange(row+1, 3).setValue('Purpose');
+  sheet.getRange(row+1, 4).setValue('Contact');
+  sheet.getRange(row+1, 5).setValue('Notes');
+  //End: Column labels
+
+  //START: Time stamps
+  sheet.getRange(row+2, 2).setValue('9:00 AM - 10:00 AM');
+  sheet.getRange(row+3, 2).setValue('10:00 AM - 11:00 AM');
+  sheet.getRange(row+4, 2).setValue('11:00 AM - 12:00 PM');
+  sheet.getRange(row+5, 2).setValue('1:00 PM - 2:00 PM');
+  sheet.getRange(row+6, 2).setValue('2:00 PM - 3:00 PM');
+  //END: Time stamps
+}
+
+function askForDate() {
+  var yearPrompt = ui.prompt("Enter Year", "e.g., 2025", ui.ButtonSet.OK_CANCEL);
+  if (yearPrompt.getSelectedButton() != ui.Button.OK) return null;
+  var year = parseInt(yearPrompt.getResponseText(), 10);
+
+  var monthPrompt = ui.prompt("Enter Month", "1-12", ui.ButtonSet.OK_CANCEL);
+  if (monthPrompt.getSelectedButton() != ui.Button.OK) return null;
+  var month = parseInt(monthPrompt.getResponseText(), 10) - 1; // JavaScript months are 0-based
+
+  var dayPrompt = ui.prompt("Enter Day", "1-31", ui.ButtonSet.OK_CANCEL);
+  if (dayPrompt.getSelectedButton() != ui.Button.OK) return null;
+  var day = parseInt(dayPrompt.getResponseText(), 10);
+
+  var date = new Date(year, month, day);
+
+  if (isNaN(date.getTime())) {
+    ui.alert("Invalid date. Please check your inputs.");
+    return null;
+  } else {
+    return date;
+  }
+}
+
+function MakeTable() {
+  var startDate = askForDate();
+  if (startDate) {
+    var startingMonth = startDate.getMonth();
+    var currentDate = new Date(startDate); // Create a copy of the date
+  
+    //counter to test if it is going through the loop
+    var counter = 1;
+
+    //LOOP:Prints out the table
+    while (currentDate.getMonth() == startingMonth) {
+      var currentDay = currentDate.getDay();
+      // Checks where the day isn't saturday or sunday
+      if(currentDay !== 0 && currentDay !== 6 && currentDay !== 2 && currentDay !== 4) {
+        
+        //START making assembling the table
+        sheet.getRange(counter, 1).setValue(currentDate).setFontWeight('bold');
+        sheet.getRange(counter, 2).setValue(currentDate)
+          .setNumberFormat('dddd", "d" "').setFontWeight('bold');
+        monWedFri(counter);
+        //Shifts the rows down by 7
+        counter+=7;
+      }
+      // Add one day
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+  }
+}
